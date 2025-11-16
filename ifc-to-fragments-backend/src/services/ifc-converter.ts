@@ -10,7 +10,7 @@ export class IfcToFragmentsConverter {
     this.wasmPath = wasmPath;
   }
 
-  async initialize(): Promise<void> {
+  initialize(): void {
     try {
       this.ifcImporter = new IfcImporter();
       this.ifcImporter.wasm.path = this.wasmPath;
@@ -61,7 +61,7 @@ export class IfcToFragmentsConverter {
     }
   }
 
-  async cleanup(): Promise<void> {
+  cleanup(): void {
     if (this.ifcImporter) {
       // Reset the importer instance
       // The IfcImporter doesn't have a dispose method,

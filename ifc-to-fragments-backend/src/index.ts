@@ -8,7 +8,7 @@ async function startServer(): Promise<void> {
   try {
     // Initialize the IFC converter
     console.log("Initializing IFC converter...");
-    await ifcConverter.initialize();
+    ifcConverter.initialize();
     console.log("IFC converter initialized successfully");
 
     // Start the server
@@ -22,12 +22,12 @@ async function startServer(): Promise<void> {
     const shutdown = async (signal: string) => {
       console.log(`\nReceived ${signal}. Starting graceful shutdown...`);
 
-      server.close(async () => {
+      server.close(() => {
         console.log("HTTP server closed");
 
         try {
           // Cleanup converter resources
-          await ifcConverter.cleanup();
+          ifcConverter.cleanup();
           console.log("IFC converter cleaned up");
         } catch (error) {
           console.error("Error during cleanup:", error);

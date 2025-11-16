@@ -20,8 +20,8 @@ describe("IfcToFragmentsConverter", () => {
     converter = new IfcToFragmentsConverter("./node_modules/web-ifc/");
   });
 
-  afterEach(async () => {
-    await converter.cleanup();
+  afterEach(() => {
+    converter.cleanup();
   });
 
   describe("constructor", () => {
@@ -39,12 +39,12 @@ describe("IfcToFragmentsConverter", () => {
   });
 
   describe("initialize", () => {
-    it("should initialize the IFC importer successfully", async () => {
-      await expect(converter.initialize()).resolves.not.toThrow();
+    it("should initialize the IFC importer successfully", () => {
+      expect(() => converter.initialize()).not.toThrow();
     });
 
-    it("should set up WASM path correctly", async () => {
-      await converter.initialize();
+    it("should set up WASM path correctly", () => {
+      converter.initialize();
       // If initialization succeeds, the importer was created
       expect(converter).toBeDefined();
     });
@@ -59,7 +59,7 @@ describe("IfcToFragmentsConverter", () => {
     });
 
     it("should convert IFC data to Fragments successfully", async () => {
-      await converter.initialize();
+      converter.initialize();
 
       const ifcData = new Uint8Array([10, 20, 30]);
       const result = await converter.convert(ifcData);
@@ -72,7 +72,7 @@ describe("IfcToFragmentsConverter", () => {
     });
 
     it("should include options in metadata", async () => {
-      await converter.initialize();
+      converter.initialize();
 
       const ifcData = new Uint8Array([10, 20, 30]);
       const options = {
@@ -87,7 +87,7 @@ describe("IfcToFragmentsConverter", () => {
     });
 
     it("should handle conversion with coordinateToOrigin option", async () => {
-      await converter.initialize();
+      converter.initialize();
 
       const ifcData = new Uint8Array([10, 20, 30]);
       const result = await converter.convert(ifcData, {
@@ -99,7 +99,7 @@ describe("IfcToFragmentsConverter", () => {
     });
 
     it("should set timestamp in ISO format", async () => {
-      await converter.initialize();
+      converter.initialize();
 
       const ifcData = new Uint8Array([10, 20, 30]);
       const result = await converter.convert(ifcData);
@@ -111,26 +111,26 @@ describe("IfcToFragmentsConverter", () => {
   });
 
   describe("cleanup", () => {
-    it("should cleanup successfully when not initialized", async () => {
-      await expect(converter.cleanup()).resolves.not.toThrow();
+    it("should cleanup successfully when not initialized", () => {
+      expect(() => converter.cleanup()).not.toThrow();
     });
 
-    it("should cleanup successfully after initialization", async () => {
-      await converter.initialize();
-      await expect(converter.cleanup()).resolves.not.toThrow();
+    it("should cleanup successfully after initialization", () => {
+      converter.initialize();
+      expect(() => converter.cleanup()).not.toThrow();
     });
 
-    it("should allow re-initialization after cleanup", async () => {
-      await converter.initialize();
-      await converter.cleanup();
+    it("should allow re-initialization after cleanup", () => {
+      converter.initialize();
+      converter.cleanup();
 
       // Should be able to initialize again
-      await expect(converter.initialize()).resolves.not.toThrow();
+      expect(() => converter.initialize()).not.toThrow();
     });
 
     it("should throw error when converting after cleanup", async () => {
-      await converter.initialize();
-      await converter.cleanup();
+      converter.initialize();
+      converter.cleanup();
 
       const ifcData = new Uint8Array([1, 2, 3]);
       await expect(converter.convert(ifcData)).rejects.toThrow(

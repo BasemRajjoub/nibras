@@ -9,16 +9,17 @@ const router = Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     const uploadDir = "uploads/";
-    try {
-      await ensureDirectoryExists(uploadDir);
-      cb(null, uploadDir);
-    } catch (error) {
-      cb(error as Error, uploadDir);
-    }
+    ensureDirectoryExists(uploadDir)
+      .then(() => {
+        cb(null, uploadDir);
+      })
+      .catch((error: Error) => {
+        cb(error, uploadDir);
+      });
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, `${uniqueSuffix}-${file.originalname}`);
   },
@@ -49,10 +50,10 @@ const upload = multer({
 router.post(
   "/convert",
   upload.single("ifc"),
-  async (req: Request, res: Response, next: NextFunction) => {
+  (req: Request, res: Response, next: NextFunction): void => {
     let filePath: string | null = null;
 
-    try {
+    const processConversion = async (): Promise<void> => {
       if (!req.file) {
         throw new ApiError("No IFC file uploaded. Please upload a file with field name 'ifc'", 400);
       }
@@ -62,10 +63,11 @@ router.post(
       // Read the uploaded IFC file as Uint8Array
       const ifcData = await readFileAsUint8Array(filePath);
 
-      // Extract options from request body
+      // Extract options from request body with type safety
+      const body = req.body as Record<string, unknown>;
       const options = {
-        name: req.body.name || req.file.originalname.replace(".ifc", ""),
-        coordinateToOrigin: req.body.coordinateToOrigin !== "false",
+        name: (typeof body.name === "string" ? body.name : req.file.originalname.replace(".ifc", "")),
+        coordinateToOrigin: body.coordinateToOrigin !== "false",
       };
 
       // Convert IFC to Fragments
@@ -81,14 +83,18 @@ router.post(
 
       // Send the binary data
       res.send(Buffer.from(result.data));
-    } catch (error) {
-      next(error);
-    } finally {
-      // Clean up the uploaded file
-      if (filePath) {
-        await deleteTempFile(filePath);
-      }
-    }
+    };
+
+    processConversion()
+      .catch(next)
+      .finally(() => {
+        // Clean up the uploaded file
+        if (filePath) {
+          deleteTempFile(filePath).catch((err: Error) => {
+            console.error("Failed to delete temp file:", err.message);
+          });
+        }
+      });
   }
 );
 
