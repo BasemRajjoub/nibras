@@ -1,0 +1,2 @@
+// Express application configuration
+export {};
