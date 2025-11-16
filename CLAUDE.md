@@ -186,7 +186,16 @@ export const ifcConverter = new IfcToFragmentsConverter();
 ### Initialization Lifecycle
 1. Service initialized at startup (`ifcConverter.initialize()`)
 2. WebAssembly path set to `./node_modules/web-ifc/`
-3. Graceful shutdown cleans up resources
+3. IFC property classes added to abstract classes for property extraction
+4. Relations configured for property set definitions (IFCRELDEFINESBYPROPERTIES)
+5. Graceful shutdown cleans up resources
+
+### IFC Property Configuration
+The converter is configured to include full IFC properties (not just name and description):
+- Property sets (IFCPROPERTYSET, IFCPROPERTYSINGLEVALUE, etc.)
+- Quantity sets (IFCELEMENTQUANTITY, IFCQUANTITYLENGTH, etc.)
+- Property relations (IFCRELDEFINESBYPROPERTIES)
+- Unique attributes and relation names enabled
 
 ### Async Error Handling
 Routes use async/await with Promise-based error propagation:

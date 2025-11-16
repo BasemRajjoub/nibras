@@ -1,5 +1,6 @@
 // IFC to Fragments conversion service
 import { IfcImporter } from "@thatopen/fragments";
+import * as WEBIFC from "web-ifc";
 import type { ConversionOptions, ConversionResult } from "../types/index.js";
 
 export class IfcToFragmentsConverter {
@@ -18,6 +19,44 @@ export class IfcToFragmentsConverter {
       this.ifcImporter.webIfcSettings = {
         COORDINATE_TO_ORIGIN: true,
       };
+
+      // Enable inclusion of unique attributes and relation names
+      this.ifcImporter.includeUniqueAttributes = true;
+      this.ifcImporter.includeRelationNames = true;
+
+      // Add property-related IFC classes to abstract classes
+      // These are needed to include IFC properties in the conversion
+      const propertyClasses = [
+        WEBIFC.IFCPROPERTYSET,
+        WEBIFC.IFCPROPERTYSINGLEVALUE,
+        WEBIFC.IFCPROPERTYLISTVALUE,
+        WEBIFC.IFCPROPERTYENUMERATEDVALUE,
+        WEBIFC.IFCPROPERTYBOUNDEDVALUE,
+        WEBIFC.IFCPROPERTYTABLEVALUE,
+        WEBIFC.IFCPROPERTYREFERENCEVALUE,
+        WEBIFC.IFCPROPERTYSETDEFINITION,
+        WEBIFC.IFCPROPERTYDEFINITION,
+        WEBIFC.IFCPROPERTY,
+        WEBIFC.IFCELEMENTQUANTITY,
+        WEBIFC.IFCQUANTITYLENGTH,
+        WEBIFC.IFCQUANTITYAREA,
+        WEBIFC.IFCQUANTITYVOLUME,
+        WEBIFC.IFCQUANTITYWEIGHT,
+        WEBIFC.IFCQUANTITYCOUNT,
+      ];
+
+      for (const classId of propertyClasses) {
+        this.ifcImporter.classes.abstract.add(classId);
+      }
+
+      // Ensure IFCRELDEFINESBYPROPERTIES is included in relations
+      // This relationship connects elements to their property sets
+      if (!this.ifcImporter.relations.has(WEBIFC.IFCRELDEFINESBYPROPERTIES)) {
+        this.ifcImporter.relations.set(WEBIFC.IFCRELDEFINESBYPROPERTIES, {
+          forRelating: "RelatingPropertyDefinition",
+          forRelated: "RelatedObjects",
+        });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to initialize IFC importer: ${message}`);

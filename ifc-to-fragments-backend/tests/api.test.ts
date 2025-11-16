@@ -8,6 +8,13 @@ jest.unstable_mockModule("@thatopen/fragments", () => ({
   IfcImporter: jest.fn().mockImplementation(() => ({
     wasm: { path: "", absolute: false },
     webIfcSettings: {},
+    includeUniqueAttributes: false,
+    includeRelationNames: false,
+    classes: {
+      elements: new Set<number>(),
+      abstract: new Set<number>(),
+    },
+    relations: new Map<number, { forRelating: string; forRelated: string }>(),
     process: jest.fn<() => Promise<Uint8Array>>().mockResolvedValue(new Uint8Array([1, 2, 3, 4, 5])),
   })),
 }));
